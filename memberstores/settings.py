@@ -17,7 +17,7 @@ SECRET_KEY = 'django-insecure-3%y3laftm62q0zaj+s7#p-xqq9(&#q+)s8)p-&#&bz*0$!xu$0
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -30,9 +30,12 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.humanize',
-    'store',
+    'store.apps.StoreConfig',
+    'crispy_forms',
     
 ]
+
+CRISPY_TEMPLATE_PACK = 'bootstrap4'
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -130,6 +133,6 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 STRIPE_PUBLIC_KEY = "pk_test_51MJycAFSBzPbzGC1bD845yNrYew0se8Nyy9Wioe0pwxYxhkMtcU4ZlwHaxIWnfMQpNKPPUzle1rZW0AhkPbBUG3600lkSsoXms"
-STRIPE_SECRET_KEY = "sk_test_51MJycAFSBzPbzGC1C9FkKOitiaEyqeCbdGyj07jKrOQmHndAFzIXIYoKbue8Y6BUU5MSWuGddVGfmGvu6TstIbkT00uWNhzt8f"
+STRIPE_PRIVATE_KEY = "sk_test_51MJycAFSBzPbzGC1C9FkKOitiaEyqeCbdGyj07jKrOQmHndAFzIXIYoKbue8Y6BUU5MSWuGddVGfmGvu6TstIbkT00uWNhzt8f"
 STRIPE_WEBHOOK_SECRET = ""
 

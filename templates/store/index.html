@@ -14,7 +14,7 @@
               </div>
             </div>
           </div>
-        <img src="{% static 'img/ol.jpeg' %}" style="width: 700px;height: 450px;" alt="img">  
+        <img src="{% static 'img/ol.jpeg' %}" style="width: 1000px;height: 450px;" alt="img">  
         </section>
 
         <!-- CATEGORIES SECTION-->
@@ -158,7 +158,9 @@
                 <p class="text-small text-muted mb-0">Quality shoes at your service</p>
               </div>
               <div class="col-lg-6">
-                <form action="#">
+                <form action="{% url 'store:subscribe' %}">
+                  {% csrf_token %}
+                   {{form}}
                   <div class="input-group flex-column flex-sm-row mb-3">
                     <input class="form-control form-control-lg py-3" type="email" placeholder="Enter your email address" aria-describedby="button-addon2">
                     <div class="input-group-append">

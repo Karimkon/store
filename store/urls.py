@@ -1,6 +1,7 @@
 from store.forms import LoginForm, PasswordChangeForm, PasswordResetForm, SetPasswordForm
 from django.urls import path
 from . import views
+from store.views import *
 from django.contrib.auth import views as auth_views
 from django.contrib import admin
 from django.urls import path
@@ -20,8 +21,13 @@ urlpatterns = [
     path('minus-cart/<int:cart_id>/', views.minus_cart, name="minus-cart"),
     path('cart/', views.cart, name="cart"),
     path('checkout/', views.checkout, name="checkout"),
-    path('orders/', views.orders, name="orders"),
-    
+    path('orders/', views.orders, name="orders"),\
+    # path('order/<int:user_id>/', views.create_order, name='create_orders'),
+    path('orders/', views.create_order, name='create_orders'),
+    path('subscribe/', subscribe, name='subscribe'),
+    path('place_order/', views.place_order, name='place_order'),
+    path('checkout/', views.checkout, name='checkout'),
+
     #URL for Products
     path('product/<slug:slug>/', views.detail, name="product-detail"),
     path('categories/', views.all_categories, name="all-categories"),
@@ -47,7 +53,16 @@ urlpatterns = [
 
     path('product/test/', views.test, name="test"),
 
-    path('cash-on-delivery/', views.cash_on_delivery, name='cash-on-delivery')
+    path('cash-on-delivery/', views.cash_on_delivery, name='cash-on-delivery'),
+
+
+
+
+
+
+    path('create-checkout-session/', views.create_checkout_session, name='checkout'),
+    path('success/', views.success,name='success'),
+    path('cancel/', views.cancel,name='cancel'),
 
 
     

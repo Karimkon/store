@@ -1,23 +1,32 @@
 import django
 from django.contrib.auth.models import User
-from store.models import Address, Cart, Category, Order, Product
+from store.models import Address, Cart, Category, Order, Product, Subscription
 from django.shortcuts import redirect, render, get_object_or_404
-from .forms import RegistrationForm, AddressForm, PaymentForm
+from .forms import RegistrationForm, AddressForm, PaymentForm, OrderForm
 from django.contrib import messages
+from django.views.decorators.csrf import csrf_exempt
 from django.views import View
 import decimal
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator # for Class Based Views
 from django.templatetags.static import static
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponseRedirect
 from django.views.decorators.http import require_http_methods
 from django.http import HttpResponse
+import datetime
+
+
+
+from .forms import AddressForm
 
 from django.views.generic import TemplateView
 
-#import stripe
-#from django.conf import settings
-#stripe.api_key = settings.STRIPE_SECRET_KEY
+import stripe
+from django.conf import settings
+stripe.api_key = settings.STRIPE_PRIVATE_KEY
+
+
+stripe.api_key = 'YOUR_STRIPE_SECRET_KEY'
 
 # Create your views here.
 image_url = static('img/ol.jpg')
@@ -189,16 +198,27 @@ def checkout(request):
     user = request.user
     address_id = request.GET.get('address')
     
-    address = get_object_or_404(Address, id=address_id)
-    # Get all the products of User in Cart
-    cart = Cart.objects.filter(user=user)
-    for c in cart:
-        # Saving all the products from Cart to Order
-        Order(user=user, address=address, product=c.product, quantity=c.quantity).save()
-        # And Deleting from Cart
-        c.delete()
-    #return redirect('store:checkout')
-    return render(request, 'store/checkout.html')
+    if address_id:
+        address = get_object_or_404(Address, id=address_id, user=user)
+        cart_items = Cart.objects.filter(user=user)
+        for item in cart_items:
+            Order.objects.create(
+                user=user,
+                address=address,
+                product=item.product,
+                quantity=item.quantity
+            )
+        cart_items.delete()
+        return redirect('store:orders')
+    
+    addresses = Address.objects.filter(user=user)
+    form = AddressForm()
+    context = {
+        'addresses': addresses,
+        'form': form
+    }
+    return render(request, 'store/checkout.html', context)
+
 
 
 @login_required
@@ -222,4 +242,113 @@ def test(request):
     return render(request, 'store/test.html')
 
 
+
+def subscribe(request):
+    if request.method == 'POST':
+        email = request.POST['email']
+        subscription = Subscription(email=email)
+        subscription.save()
+        return redirect('home_page')
+    else:
+        return render(request, 'store/index.html')
+    
+
+#Here, we retrieve the logged-in user from the request object and create a new Order object with the user and the form data submitted by the user. We first check if the request method is POST (i.e., if the form has been submitted). If it is, we validate the form using form.is_valid() and extract the cleaned data from the form using form.cleaned_data. We then create a new Order object with the logged-in user and the form data and save it to the database. We display a success message to the user using messages.success() and redirect the user to the orders page using redirect('orders').
+
+#If the request method is not POST (i.e., if the form has not been submitted), we create a new OrderForm object and render the create_order.html template with the form.
+def create_order(request):
+    # retrieve the logged-in user
+    user = request.user
+    #user = User.objects.get(id=user_id)
+    # create a new order object with the logged-in user and form data
+    if request.method == 'POST':
+        form = OrderForm(request.POST)
+        if form.is_valid():
+            data = form.cleaned_data
+            address = data['address']
+            product = data['product']
+            quantity = data['quantity']
+            order = Order(user=user, address=address, product=product, quantity=quantity)
+            order.save()
+            messages.success(request, 'Order placed successfully!')
+            return redirect('orders')
+    else:
+        form = OrderForm()
+    
+    context = {'form': form}
+    return render(request, 'store/orders.html', context)
+
+def order_view(request):
+    if request.method == 'POST':
+        form = OrderForm(request.POST)
+        if form.is_valid():
+            name = form.cleaned_data['name']
+            email = form.cleaned_data['email']
+            phone_number = form.cleaned_data['phone_number']
+            address = form.cleaned_data['address']
+            item = form.cleaned_data['item']
+            quantity = form.cleaned_data['quantity']
+            ordered_date = datetime.datetime.now()
+            status = 'Pending'
+
+            order = Order(name=name, email=email, phone_number=phone_number, address=address, item=item, quantity=quantity, ordered_date=ordered_date, status=status)
+            order.save()
+
+            return HttpResponseRedirect('/orders/')
+    else:
+        form = OrderForm()
+
+    orders = Order.objects.all()
+    return render(request, 'orders.html', {'orders': orders})
+
+def place_order(request):
+    form = OrderForm(request.POST or None)
+    if form.is_valid():
+        order = form.save() # save the order to the database
+        # loop through the order items and create OrderItem objects
+        for item in order.items.all():
+            Order.objects.create(
+                order=order,
+                product=item.product,
+                quantity=item.quantity,
+                price=item.product.price
+            )
+        return redirect('orders') # redirect to the orders page
+    context = {
+        'form': form,
+        'order_items': [], # initialize an empty list for the order items
+        'total': 0 # initialize the total to zero
+    }
+    return render(request, 'checkout.html', context)
+
+
+
+def success(request):
+     return render(request,'store/success.html')
+
+ #cancel view
+def cancel(request):
+ return render(request,'store/cancel.html')
+
+YOUR_DOMAIN = 'http://127.0.0.1:8000'
+
+@csrf_exempt
+def create_checkout_session(request):     
+        session = stripe.checkout.Session.create(
+        payment_method_types=['card'],
+        line_items=[{
+        'price_data': {
+        'currency': 'inr',
+        'product_data': {
+        'name': 'Intro to Django Course',
+        },
+        'unit_amount': 10000,
+        },
+        'quantity': 1,
+        }],
+        mode='payment',
+        success_url=YOUR_DOMAIN + 'store/success.html',
+        cancel_url=YOUR_DOMAIN + 'store/cancel.html',
+        )
+        return JsonResponse({'id': session.id})
 

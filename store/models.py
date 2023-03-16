@@ -88,3 +88,14 @@ class Order(models.Model):
         max_length=50,
         default="Pending"
         )
+    def __str__(self):
+        return f"{self.quantity} of {self.product.title} by {self.user.username}"
+    
+    def get_total_cost(self):
+        return self.quantity * self.product.price
+
+class Subscription(models.Model):
+    email = models.EmailField()
+
+    def __str__(self):
+        return self.email

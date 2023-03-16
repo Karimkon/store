@@ -1,5 +1,5 @@
 from django.contrib.auth import password_validation
-from store.models import Address
+from store.models import Address, Order
 from django import forms
 import django
 from django.contrib.auth.models import User
@@ -55,3 +55,8 @@ class PaymentForm(forms.Form):
     email = forms.EmailField()
     phone=forms.CharField(max_length=15)
     amount = forms.FloatField()
+
+class OrderForm(forms.ModelForm):
+    class Meta:
+        model = Order
+        fields = ['address', 'product', 'quantity']

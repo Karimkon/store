@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Address, Category, Product, Cart, Order
+from .models import Address, Category, Product, Cart, Order, Subscription
 
 # Register your models here.
 class AddressAdmin(admin.ModelAdmin):
@@ -41,7 +41,10 @@ class OrderAdmin(admin.ModelAdmin):
     list_per_page = 20
     search_fields = ('user', 'product')
 
+class SubscriptionAdmin(admin.ModelAdmin):
+    list_display = ['email']
 
+admin.site.register(Subscription, SubscriptionAdmin)
 admin.site.register(Address, AddressAdmin)
 admin.site.register(Category, CategoryAdmin)
 admin.site.register(Product, ProductAdmin)
