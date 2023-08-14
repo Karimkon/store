@@ -1,0 +1,14 @@
+{% extends 'custom_admin/ase.html' %}
+{% load static %}
+{% block content %}
+<h1>Product List</h1>
+<ul>
+    {% for product in products %}
+        <li>
+            {{ product.title }}
+            <a href="{% url 'custom_admin:product-edit' product.pk %}">Edit</a>
+            <a href="{% url 'custom_admin:product-delete' product.pk %}">Delete</a>
+        </li>
+    {% endfor %}
+</ul>
+{% endblock content %}

@@ -1,0 +1,21 @@
+<!-- templates/store/blog.html -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+  <link rel="stylesheet" type="text/css" href="{% static 'css/form.css' %}">
+
+  <h1>Availale Blogs</h1>
+  {% for post in blog_posts %}
+  <div class="blog-post">
+    <h2>{{ post.title }}</h2>
+    {% if post.image %}
+      <img src="{{ post.image.url }}" alt="{{ post.title }}">
+    {% endif %}
+    <p>{{ post.content }}</p>
+    <p class="publish-date">{{ post.publish_date }}</p>
+  </div>
+{% endfor %}
+
+
+{% endblock content %}

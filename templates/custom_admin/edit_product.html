@@ -1,0 +1,12 @@
+{% extends 'custom_admin/ase.html' %}
+{% block content %}
+  <h1>Edit Product: {{ product.title }}</h1>
+  <form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Save Changes</button>
+  </form> <br>
+  <button class="btn btn-outline-success" type="button">
+    <a href="{% url 'custom_admin:dashboard' %}" class="btn-link">Back</a>
+  </button>
+{% endblock %}

@@ -1,0 +1,10 @@
+{% extends 'custom_admin/ase.html' %}
+{% load static %}
+{% block content %}
+<h1>{% if object %}Update{% else %}Create{% endif %} Product</h1>
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Save</button>
+</form>
+{% endblock content %}
